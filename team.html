@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 | 上方山山地路径规划决策系统</title>
+    <meta name="description" content="上方山山地路径规划决策系统研究团队、成员分工与野外实践记录。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #1b4332;
+            --primary-light: #2d6a4f;
+            --accent-color: #40916c;
+            --text-main: #1b2622;
+            --text-muted: #52796f;
+            --bg-light: #f4f7f5;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(45, 106, 79, 0.12);
+            --font-art: "Playfair Display", "Noto Serif SC", serif;
+            --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+        }
+
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            line-height: 1.7;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 全局背景纹理 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232d6a4f' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e9efe9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 10px;
+            border: 2px solid #e9efe9;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* 滚动进度条 */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), #74c69d);
+            z-index: 9999;
+            transition: width 0.1s ease-out;
+            box-shadow: 0 2px 12px rgba(27, 67, 50, 0.35);
+        }
+
+        /* 滚动渐显动画基础类 */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+    /* Shared navigation styles are maintained in css/style.css. */
+        /* 顶部横幅：动态照片轴背景 */
+        .page-header {
+            position: relative;
+            width: 100%;
+            margin-top: 65px;
+            /* 与 index.html 的 hero margin-top 一致 */
+            padding: 5rem 2rem;
+            text-align: center;
+            overflow: hidden;
+            color: #fff;
+            box-shadow: 0 15px 40px rgba(27, 67, 50, 0.15);
+        }
+
+        .header-bg-container {
+            position: absolute;
+            inset: -30px;
+            z-index: 1;
+            display: flex;
+            width: max-content;
+            background: #111a14;
+            animation: autoScroll 45s linear infinite;
+        }
+
+        .header-bg-container:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes autoScroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .scroll-track {
+            display: flex;
+            height: 100%;
+            align-items: center;
+        }
+
+        .bg-slice {
+            position: relative;
+            width: 380px;
+            height: 320px;
+            margin: 0 12px;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            animation: floatWave 7s ease-in-out infinite;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+        }
+
+        .bg-slice:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .bg-slice:nth-child(2) {
+            animation-delay: 1.2s;
+        }
+        .bg-slice:nth-child(3) {
+            animation-delay: 2.4s;
+        }
+        .bg-slice:nth-child(4) {
+            animation-delay: 3.6s;
+        }
+        .bg-slice:nth-child(5) {
+            animation-delay: 4.8s;
+        }
+        .bg-slice:nth-child(6) {
+            animation-delay: 6.0s;
+        }
+
+        @keyframes floatWave {
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-16px) rotate(1.2deg);
+            }
+        }
+
+        .bg-slice img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.85) saturate(1.2) contrast(1.05);
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s ease;
+        }
+
+        .bg-slice:hover {
+            transform: translateY(-24px) scale(1.08) rotate(-1.5deg) !important;
+            box-shadow: 0 25px 50px rgba(45, 106, 79, 0.4);
+            z-index: 10;
+            animation-play-state: paused;
+        }
+
+        .bg-slice:hover img {
+            transform: scale(1.15);
+            filter: brightness(1.0) saturate(1.4);
+        }
+
+        .page-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(27, 67, 50, 0.72), rgba(15, 38, 28, 0.85));
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .page-header>* {
+            position: relative;
+            z-index: 3;
+        }
+
+        .badge-top {
+            display: inline-block;
+            padding: 0.35rem 1.1rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            border-radius: 30px;
+            font-size: 0.72rem;
+            font-family: var(--font-art);
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-header h1 {
+            font-family: var(--font-art);
+            font-size: 3.5rem;
+            letter-spacing: 2.5px;
+            color: #ffffff;
+            margin-bottom: 0.6rem;
+            font-weight: 800;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+        }
+        .page-header p {
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 1.2rem;
+            max-width: 650px;
+            margin: 0 auto;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 核心布局容器 */
+        .main-container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 4.5rem 2rem 6rem 2rem;
+        }
+
+        /* 艺术性小标题统一样式 */
+        .section-art-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .section-art-title .sub-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 3.5px;
+            color: var(--primary-light);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: rgba(45, 106, 79, 0.06);
+            padding: 0.2rem 1rem;
+            border-radius: 20px;
+        }
+        .section-art-title h2 {
+            font-family: var(--font-art);
+            font-size: 2.6rem;
+            color: var(--primary-color);
+            letter-spacing: 1.5px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(27, 67, 50, 0.05);
+        }
+
+        /* 研究单位与元信息矩阵 */
+        .unified-meta-banner {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(244, 248, 245, 0.9) 100%);
+            backdrop-filter: blur(15px);
+            color: var(--text-main);
+            border: 1px solid rgba(45, 106, 79, 0.16);
+            border-radius: 26px;
+            padding: 3.2rem 3.8rem;
+            box-shadow: 0 20px 45px rgba(27, 67, 50, 0.07);
+            margin-bottom: 5.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .unified-meta-banner:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 55px rgba(27, 67, 50, 0.12);
+        }
+
+        .unified-meta-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, #1b4332, #2d6a4f, #52b788);
+            border-radius: 26px 0 0 26px;
+        }
+
+        .banner-system-badge {
+            position: absolute;
+            top: 24px;
+            right: 30px;
+            font-size: 0.68rem;
+            font-family: var(--font-sans);
+            letter-spacing: 2.2px;
+            color: var(--primary-light);
+            background: rgba(45, 106, 79, 0.08);
+            border: 1px solid rgba(45, 106, 79, 0.2);
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 3;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.8rem;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(45, 106, 79, 0.08);
+            border-radius: 16px;
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px rgba(27, 67, 50, 0.02);
+        }
+        .meta-item:hover {
+            background: #ffffff;
+            border-color: rgba(45, 106, 79, 0.35);
+            transform: translateX(8px);
+            box-shadow: 0 10px 28px rgba(27, 67, 50, 0.08);
+        }
+
+        .meta-label-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 230px;
+            flex-shrink: 0;
+        }
+        .meta-icon-dot {
+            width: 9px;
+            height: 9px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(45, 106, 79, 0.4);
+            transition: transform 0.3s ease;
+        }
+        .meta-item:hover .meta-icon-dot {
+            transform: scale(1.4);
+            background: var(--primary-color);
+        }
+
+        .meta-item h4 {
+            font-size: 0.84rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .meta-content-box {
+            flex: 1;
+            text-align: right;
+        }
+        .meta-item p {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.4px;
+            transition: color 0.3s ease;
+        }
+        .meta-item:hover p {
+            color: var(--primary-color);
+        }
+
+        .meta-item.hover-trigger {
+            cursor: pointer;
+        }
+        .meta-item.hover-trigger .highlight {
+            display: inline-flex;
+            align-items: center;
+            color: #2d6a4f;
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(45, 106, 79, 0.1);
+        }
+
+        /* ✨ 导师悬浮照片弹出框 */
+        #teacherPopupCard {
+            position: fixed;
+            width: 360px;
+            height: auto;
+            background: #ffffff;
+            border: 2px solid var(--primary-light);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(27, 67, 50, 0.3);
+            overflow: hidden;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #teacherPopupCard.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        #teacherPopupCard img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .meta-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 1rem 1.2rem;
+            }
+            .meta-label-group {
+                width: auto;
+            }
+            .meta-content-box {
+                text-align: left;
+                padding-left: 1.4rem;
+            }
+        }
+
+        /* 交互式主工作台 (小组成员) */
+        .interactive-workspace {
+            display: grid;
+            grid-template-columns: 1fr 410px;
+            gap: 3.5rem;
+            align-items: start;
+            margin-bottom: 6.5rem;
+        }
+        @media (max-width: 1150px) {
+            .interactive-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.6rem;
+        }
+        @media (max-width: 850px) {
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 550px) {
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .member-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            position: relative;
+        }
+        .member-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            transition: background 0.3s ease;
+            z-index: 3;
+        }
+        .member-card:hover,
+        .member-card.active {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--primary-light);
+            box-shadow: 0 20px 45px rgba(27, 67, 50, 0.12), 0 0 0 1px rgba(45, 106, 79, 0.1);
+        }
+        .member-card.active::before {
+            background: var(--primary-color);
+        }
+
+        .member-photo-box {
+            width: 100%;
+            height: 175px;
+            overflow: hidden;
+            position: relative;
+        }
+        .member-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .member-card:hover .member-photo,
+        .member-card.active .member-photo {
+            transform: scale(1.12);
+        }
+
+        .member-mini-info {
+            padding: 1.2rem;
+            text-align: center;
+        }
+        .member-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+        .member-role-badge {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: rgba(45, 106, 79, 0.05);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* 右侧控制台面板 */
+        .detail-console {
+            position: sticky;
+            top: 95px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.8rem;
+            box-shadow: 0 15px 45px rgba(27, 67, 50, 0.07);
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.4s ease;
+        }
+        .detail-console:hover {
+            border-color: rgba(45, 106, 79, 0.25);
+            box-shadow: 0 22px 50px rgba(27, 67, 50, 0.12);
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            gap: 1.3rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.6rem;
+            border-bottom: 1px solid rgba(45, 106, 79, 0.08);
+        }
+        .console-avatar-wrapper {
+            position: relative;
+            width: 76px;
+            height: 76px;
+        }
+        .console-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+            box-shadow: 0 6px 16px rgba(27, 67, 50, 0.15);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .console-avatar-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1.5px dashed var(--accent-color);
+            animation: spinRing 12s linear infinite;
+            opacity: 0.6;
+        }
+        @keyframes spinRing {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .console-title-group h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+        .console-title-group span {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .console-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .console-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+        .console-desc-text {
+            font-size: 1rem;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .skills-matrix {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+        .skill-badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.9rem;
+            background: rgba(45, 106, 79, 0.06);
+            border: 1px solid rgba(45, 106, 79, 0.12);
+            border-radius: 8px;
+            color: var(--primary-light);
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+        .skill-badge:hover {
+            background: var(--primary-color);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(27, 67, 50, 0.2);
+        }
+
+        .console-footer-tip {
+            margin-top: 2rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: center;
+            border-top: 1px solid rgba(45, 106, 79, 0.08);
+            padding-top: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* 9天实践灵动日志时间轴 */
+        .timeline-section {
+            position: relative;
+            margin-top: 6rem;
+        }
+
+        .timeline-container {
+            position: relative;
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2.5px;
+            background: linear-gradient(to bottom, rgba(45, 106, 79, 0.05), rgba(45, 106, 79, 0.35), rgba(45, 106, 79, 0.05));
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .timeline-container::before {
+                left: 24px;
+            }
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 3.5rem;
+            width: 50%;
+            padding-right: 2.8rem;
+        }
+        .timeline-item:nth-child(even) {
+            margin-left: 50%;
+            padding-right: 0;
+            padding-left: 2.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                width: 100%;
+                margin-left: 0;
+                padding-left: 60px;
+                padding-right: 0;
+            }
+        }
+
+        .timeline-node-dot {
+            position: absolute;
+            right: -8px;
+            top: 22px;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border: 3.5px solid var(--primary-light);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(45, 106, 79, 0.45);
+            z-index: 2;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .timeline-item:nth-child(even) .timeline-node-dot {
+            right: auto;
+            left: -8px;
+        }
+        @media (max-width: 768px) {
+            .timeline-item .timeline-node-dot,
+            .timeline-item:nth-child(even) .timeline-node-dot {
+                left: 16px;
+                right: auto;
+            }
+        }
+        .timeline-item:hover .timeline-node-dot {
+            background: var(--primary-color);
+            transform: scale(1.35);
+            box-shadow: 0 0 18px rgba(45, 106, 79, 0.7);
+        }
+
+        .timeline-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 1.8rem;
+            box-shadow: 0 12px 35px rgba(27, 67, 50, 0.05);
+            position: relative;
+            transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .timeline-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            border-color: rgba(45, 106, 79, 0.35);
+            box-shadow: 0 20px 45px rgba(27, 67, 50, 0.12);
+        }
+
+        .timeline-photo-frame {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            position: relative;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        .timeline-photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+            filter: brightness(0.92) saturate(1.1);
+        }
+        .timeline-card:hover .timeline-photo-frame img {
+            transform: scale(1.08);
+            filter: brightness(1.0) saturate(1.25);
+        }
+
+        .timeline-day-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 0.6rem;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(27, 67, 50, 0.2);
+        }
+
+        .timeline-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.4px;
+        }
+
+        .timeline-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background: #111a14;
+            color: #95b2a0;
+            padding: 4rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 7rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        footer p {
+            letter-spacing: 1px;
+        }
+
+        /* ============================================================
+               返回顶部按钮 — 增加脉冲光效
+               ============================================================ */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 6px 28px rgba(27, 67, 50, 0.35);
+            z-index: 999;
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .back-to-top::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: rgba(45, 106, 79, 0.25);
+            z-index: -1;
+            animation: pulse-ring 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .back-to-top:hover,
+        .back-to-top:focus-visible {
+            transform: translateY(-3px) scale(1.06);
+            box-shadow: 0 12px 40px rgba(27, 67, 50, 0.5);
+            background: linear-gradient(135deg, #1f4d3a, #337a5a);
+        }
+
+        .back-to-top:active {
+            transform: scale(0.90);
+            box-shadow: 0 4px 16px rgba(27, 67, 50, 0.3);
+        }
+
+        .back-to-top svg {
+            display: block;
+            width: 24px;
+            height: 24px;
+            stroke: #fff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            transition: transform 0.3s ease;
+        }
+
+        .back-to-top:hover svg {
+            transform: translateY(-2px);
+        }
+            /* 1. 导航栏主体：添加背景素材图与半透明遮罩 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 4rem;
+            z-index: 1000;
+            
+            /* 核心：放置素材背景图，并叠加一层半透明白色磨砂，避免背景图过杂干扰文字阅读 */
+                    /* 将 photo/nav-bg.jpg 换成你的素材图路径 */
+            background: 
+            url("photo/sc2.png") 55% center/auto 100% no-repeat,
+            linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.92));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(44, 98, 44, 0.12);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        /* 2. 左上角 Logo 容器 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Logo 图片尺寸控制（保证高度与导航栏协调） */
+        .logo-img {
+            height: 50px;         /* 根据你们 Logo 的长宽比微调，通常 38px~46px 最合适 */
+            width: auto;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+        }
+
+        /* Logo 旁边的双行文本排版 */
+        .logo-text-group {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+        }
+
+        .logo-title {
+            font-family: var(--font-sans);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary-color, #2c622c);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-subtitle {
+            font-family: var(--font-art);
+            font-size: 0.68rem;
+            color: var(--text-muted, #5c645e);
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+            /* 确保父容器是相对定位，作为绝对定位的参照物 */
+        .relative-box {
+        position: relative;
+        overflow: hidden; /* 防止插图局部超出板块边缘造成横向滚动条 */
+        }
+
+        /* 装饰性 PNG 插图基础样式 */
+        .deco-png {
+        position: absolute;
+        pointer-events: none; /* 核心：穿透鼠标事件，鼠标划过不会阻挡文字选中或点击 */
+        z-index: 0;           /* 置于文字层下方 */
+        opacity: 0.8;        /* 保持半透明暗纹质感，通常 0.1~0.25 最显高级 */
+        transition: opacity 0.4s ease;
+        }
+
+        /* 位置变体 1：右上角悬浮 */
+        .deco-top-right {
+        top: 0px;
+        right: 0px;
+        width: 200px;
+        height: auto;
+        }
+        .deco-1 {
+        top: 300px;
+        right: 100px;
+        width: 400px;
+        height: auto;
+        }
+        .deco-2 {
+        top: 1270px;
+        right: 160px;
+        width: 120px;
+        height: auto;
+        }
+        .deco-3 {
+        top: 1200px;
+        right: 360px;
+        width: 100px;
+        height: auto;
+        }
+        .deco-4 {
+        top: 1100px;
+        right: 120px;
+        width: 110px;
+        height: auto;
+        }
+        .deco-bottom-right {
+        bottom: 0px;
+        right: 0px;
+        width: 500px;
+        height: auto;
+        }
+
+        /* 位置变体 2：左下角悬浮 */
+        .deco-bottom-left {
+        bottom: 30px;
+        left: -10px;
+        width: 800px;
+        height: auto;
+        }
+
+        /* 保证前景文字比装饰图层级高 */
+        .content-split, .section-title, .grid-3 {
+        position: relative;
+        z-index: 1;
+        }
+
+        /* 手机端隐藏过大的装饰图，保持干净 */
+        @media (max-width: 768px) {
+        .deco-png {
+            display: none;
+        }
+        }
+
+        /* 3. 移动端自适应（防止屏幕过窄时标题和菜单打架） */
+        @media (max-width: 900px) {
+            .navbar {
+            padding: 0.7rem 1.5rem;
+            }
+            .logo-subtitle {
+            display: none;      /* 窄屏下隐藏英文小副标，保持清爽 */
+            }
+            .logo-title {
+            font-size: 0.95rem;
+            }
+            .logo-img {
+            height: 34px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 48px;
+                height: 48px;
+            }
+            .back-to-top svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: .8rem 1rem; }
+            .logo { font-size: .9rem; max-width: calc(100% - 3.5rem); }
+            .nav-toggle {
+                display: inline-flex; align-items: center; justify-content: center;
+                width: 2.5rem; height: 2.5rem; border: 1px solid rgba(45,106,79,.35);
+                border-radius: 4px; background: #fff; color: var(--primary-color); font-size: 1.25rem;
+            }
+            .nav-links {
+                display: none; position: absolute; top: 100%; left: 0; right: 0; padding: .5rem 1rem 1rem;
+                flex-direction: column; align-items: stretch; gap: 0; background: rgba(255,255,255,.98);
+                border-bottom: 1px solid rgba(0,0,0,.06);
+            }
+            .nav-links.is-open { display: flex; }
+            .nav-links a { padding: .75rem .5rem; }
+            .nav-btn { text-align: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+
+        .back-to-top.hidden {
+            opacity: 0 !important;
+            transform: scale(0.8) translateY(10px) !important;
+            pointer-events: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 滚动进度条 -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+      <!-- 1. 顶部菜单栏 -->
+    <nav class="navbar">
+        <!-- 左上角：Logo 图标 + 系统标题 -->
+        <a href="sfs.html" class="logo-container">
+        <!-- 将 logo.png 换成你们实际存放 Logo 的相对路径 -->
+        <img src="photo/logo.png" alt="系统Logo" class="logo-img">
+        </a>
+
+        <!-- 右侧菜单项 -->
+        <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="view.html">上方山景</a>
+        <a href="research.html">研究流程</a>
+        <a href="team.html" class="active">关于我们</a>
+        <a href="http://127.0.0.1:8765" target="_blank" class="nav-btn">道路识别成果</a>
+        </div>
+    </nav>
+
+    <!-- 顶部横幅 -->
+    <header class="page-header">
+        <div class="header-bg-container">
+            <div class="scroll-track">
+                <div class="bg-slice"><img src="photo\合照1.jpg" alt="上方山森林1"></div>
+                <div class="bg-slice"><img src="photo\合照2.jpg" alt="上方山森林2"></div>
+                <div class="bg-slice"><img src="photo\合照3.jpg" alt="上方山森林3"></div>
+                <div class="bg-slice"><img src="photo\合照4.jpg" alt="上方山森林4"></div>
+                <div class="bg-slice"><img src="photo\合照5.jpg" alt="上方山森林5"></div>
+                <div class="bg-slice"><img src="photo\合照6.jpeg" alt="上方山森林6"></div>
+                <div class="bg-slice"><img src="photo\合照7.jpg" alt="上方山森林7"></div>
+            </div>
+            <div class="scroll-track" aria-hidden="true">
+                <div class="bg-slice"><img src="photo\合照1.jpg" alt="上方山森林1"></div>
+                <div class="bg-slice"><img src="photo\合照2.jpg" alt="上方山森林2"></div>
+                <div class="bg-slice"><img src="photo\合照3.jpg" alt="上方山森林3"></div>
+                <div class="bg-slice"><img src="photo\合照4.jpg" alt="上方山森林4"></div>
+                <div class="bg-slice"><img src="photo\合照5.jpg" alt="上方山森林5"></div>
+                <div class="bg-slice"><img src="photo\合照6.jpeg" alt="上方山森林6"></div>
+                <div class="bg-slice"><img src="photo\合照7.jpg" alt="上方山森林7"></div>
+            </div>
+        </div>
+
+        <div class="badge-top">RESEARCH TEAM PROFILE</div>
+        <h1>核心团队</h1>
+        <p>协同攻坚 · 高分辨率遥感解译 · 路径规划</p>
+    </header>
+
+    <!-- 主体内容 -->
+    <main class="main-container">
+
+        <!-- 研究单位与元信息矩阵 -->
+        <div class="unified-meta-banner reveal-on-scroll">
+            <div class="banner-system-badge">Research  Metadata</div>
+
+            <div class="meta-item">
+                <div class="meta-label-group">
+                    <div class="meta-icon-dot"></div>
+                    <h4>研究单位 / 专业</h4>
+                </div>
+                <div class="meta-content-box">
+                    <p>人工智能学院 · 地理信息科学</p>
+                </div>
+            </div>
+
+            <div class="meta-item hover-trigger" id="teacherTrigger" data-teacher-photo="photo\艾刚老师.jpg">
+                <div class="meta-label-group">
+                    <div class="meta-icon-dot"></div>
+                    <h4>指导教师</h4>
+                </div>
+                <div class="meta-content-box">
+                    <p class="highlight">艾刚</p>
+                </div>
+            </div>
+
+            <div class="meta-item">
+                <div class="meta-label-group">
+                    <div class="meta-icon-dot"></div>
+                    <h4>所属实践 / 课题</h4>
+                </div>
+                <div class="meta-content-box">
+                    <p>3S 综合实习项目</p>
+                </div>
+            </div>
+
+            <div class="meta-item">
+                <div class="meta-label-group">
+                    <div class="meta-icon-dot"></div>
+                    <h4>实践基地 / 区域</h4>
+                </div>
+                <div class="meta-content-box">
+                    <p class="highlight">北京上方山国家森林公园</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✨ 悬浮弹出的教师照片卡片容器 -->
+        <div id="teacherPopupCard">
+            <img id="teacherPopupImg" src="photo\艾刚老师.jpg" alt="艾刚老师照片">
+        </div>
+
+        <!-- 小组成员板块 -->
+        <div class="section-art-title reveal-on-scroll">
+            <span class="sub-tag">The Collaborators</span>
+            <h2>同行者：智慧与热忱的交织</h2>
+        </div>
+
+        <!-- 工作台：左侧团队列表 + 右侧控制台 -->
+        <div class="interactive-workspace reveal-on-scroll">
+
+            <div class="team-grid" id="teamGrid">
+
+                <div class="member-card active" data-name="王德正" data-role="「饭醉老大」" data-desc="统领项目全局，负责上方山现场多源空间数据的敏捷采集、基线解算与外业踏勘路线规划，统筹各阶段野外调查任务的落地，并全程保障团队安全与各项需求。" data-skills="综合统筹,基线解算,外业勘测,数据采集,路线规划,安全应急" data-photo="photo\王德正.jpg">
+                    <div class="member-photo-box">
+                        <img src="photo/王德正.jpg" alt="王德正" class="member-photo" loading="lazy" decoding="async">
+                    </div>
+                    <div class="member-mini-info">
+                        <div class="member-name">王德正</div>
+                        <div class="member-role-badge">「饭醉老大」</div>
+                    </div>
+                </div>
+
+                <div class="member-card" data-name="黄宇翔" data-role="「周口店爱猫冷少」" data-desc="项目核心技术骨干，牵头道路识别关键技术攻关，主导多源遥感影像的采集、植被地物精细滤波与三维实景还原，从复杂山地环境中抽丝剥茧还原高精度空间信息。" data-skills="道路识别,遥感影像,三维建模,植被滤波,实景还原" data-photo="photo\黄宇翔.jpg">
+                    <div class="member-photo-box">
+                        <img src="photo/黄宇翔.jpg" alt="黄宇翔" class="member-photo" loading="lazy" decoding="async">
+                    </div>
+                    <div class="member-mini-info">
+                        <div class="member-name">黄宇翔</div>
+                        <div class="member-role-badge">「周口店爱猫冷少」</div>
+                    </div>
+                </div>
+
+                <div class="member-card" data-name="李炘昊" data-role="「老绷带」" data-desc="负责部分专题制图与论文撰写工作，参与 GNSS 控制网布设与测量仪器运维，保障空间定位底层网形的高精度与成果表达的规范性。" data-skills="专题制图,论文撰写,GNSS 测量,网形优化,坐标转换" data-photo="photo\李炘昊.jpg">
+                    <div class="member-photo-box">
+                        <img src="photo/李炘昊.jpg" alt="李炘昊" class="member-photo" loading="lazy" decoding="async">
+                    </div>
+                    <div class="member-mini-info">
+                        <div class="member-name">李炘昊</div>
+                        <div class="member-role-badge">「老绷带」</div>
+                    </div>
+                </div>
+
+                <div class="member-card" data-name="许雨蒙" data-role="「小美人鱼」" data-desc="主导展示网页的整体制作，参与 PPT 制作与论文撰写，基于 0.3 m DEM 参与山地应急通行空间数据库构建，打通多源地理信息的融合链路与系统集成。" data-skills="网页制作,PPT 制作,论文撰写,空间数据库,GIS 集成" data-photo="photo\许雨蒙.jpg">
+                    <div class="member-photo-box">
+                        <img src="photo/许雨蒙.jpg" alt="许雨蒙" class="member-photo" loading="lazy" decoding="async">
+                    </div>
+                    <div class="member-mini-info">
+                        <div class="member-name">许雨蒙</div>
+                        <div class="member-role-badge">「小美人鱼」</div>
+                    </div>
+                </div>
+
+                <div class="member-card" data-name="韩宏杰" data-role="「爆笑虫子」" data-desc="参与论文撰写、网页制作与专题制图工作，聚焦上方山山地应急路径的网络分析与阻力模型构建，精准推演多灾害场景下的救援逃生动线与可达性评价。" data-skills="论文撰写,网页制作,专题制图,网络分析,路径算法" data-photo="photo\韩宏杰.jpg">
+                    <div class="member-photo-box">
+                        <img src="photo/韩宏杰.jpg" alt="韩宏杰" class="member-photo" loading="lazy" decoding="async">
+                    </div>
+                    <div class="member-mini-info">
+                        <div class="member-name">韩宏杰</div>
+                        <div class="member-role-badge">「爆笑虫子」</div>
+                    </div>
+                </div>
+
+                <div class="member-card" data-name="李成林" data-role="「女皇陛下」" data-desc="负责宣传海报与系统使用手册的制作，参与网页制作与 PPT 制作，执掌综合专题成果的地图数字化编绘与空间可视化表达。" data-skills="宣传海报,使用手册,网页制作,PPT 制作,地图制图" data-photo="photo\李成林.jpg">
+                    <div class="member-photo-box">
+                        <img src="photo/李成林.jpg" alt="李成林" class="member-photo" loading="lazy" decoding="async">
+                    </div>
+                    <div class="member-mini-info">
+                        <div class="member-name">李成林</div>
+                        <div class="member-role-badge">「女皇陛下」</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 右侧控制台面板 -->
+            <div class="detail-console" id="detailConsole">
+                <div>
+                    <div class="console-header">
+                        <div class="console-avatar-wrapper">
+                            <img src="photo\王德正.jpg" alt="成员头像" class="console-avatar" id="consoleAvatar">
+                        </div>
+                        <div class="console-title-group">
+                            <h3 id="consoleName">王德正</h3>
+                            <span id="consoleRole">「饭醉老大」</span>
+                        </div>
+                    </div>
+                    <div class="console-body">
+                        <div>
+                            <div class="console-section-title">核心分工与职责</div>
+                            <p class="console-desc-text" id="consoleDesc">统领项目全局，负责上方山现场多源空间数据的敏捷采集、基线解算与外业踏勘路线规划，统筹各阶段野外调查任务落地，并全程保障团队安全与各项需求。</p>
+                        </div>
+                        <div>
+                            <div class="console-section-title">专业技能与技术标签</div>
+                            <div class="skills-matrix" id="consoleSkills">
+                                <span class="skill-badge">综合统筹</span>
+                                <span class="skill-badge">基线解算</span>
+                                <span class="skill-badge">外业勘测</span>
+                                <span class="skill-badge">数据采集</span>
+                                <span class="skill-badge">安全应急</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="console-footer-tip">
+                    数据有尺，山路有痕
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 9天实践灵动日志板块 -->
+        <div class="timeline-section relative-box">
+            <img src="photo/m7.png" alt="山峦插图" class="deco-png deco-top-right">
+            <img src="photo/m6.png" alt="山峦插图" class="deco-png deco-1">
+            <img src="photo/m8.png" alt="山峦插图" class="deco-png deco-2">
+            <img src="photo/m9.png" alt="山峦插图" class="deco-png deco-3">
+            <img src="photo/m10.png" alt="山峦插图" class="deco-png deco-4">
+            <img src="photo/sc8.png" alt="山峦插图" class="deco-png deco-bottom-right">
+            <div class="section-art-title reveal-on-scroll">
+                <span class="sub-tag">Chronicle of Practice</span>
+                <h2>九日寻径：上方山探索足迹与心路</h2>
+            </div>
+
+            <div class="timeline-container">
+
+                <!-- Day 1 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d1.jpg" alt="Day 1 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 01</span>
+                        <h3>奔赴上方山开展综合考察与数据采集</h3>
+                        <p>清晨集合出发。抵达上方山开展地质环境综合考察、踏勘与测量，野外午餐自带干粮。下午下山前往周口店基地晚餐并入住。</p>
+                    </div>
+                </div>
+
+                <!-- Day 2 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d2.png" alt="Day 2 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 02</span>
+                        <h3>GNSS 控制网布设设计与阶段汇报</h3>
+                        <p>上午布置控制网布设设计任务；下午开展设计计划汇报及专题进展汇报，理清空间定位与网形优化方案。</p>
+                    </div>
+                </div>
+
+                <!-- Day 3 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d3.jpg" alt="Day 3 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 03</span>
+                        <h3>开展 GNSS 控制测量</h3>
+                        <p>全天深入野外开展 GNSS 控制测量作业，严格落实各项观测规范，总结经验。</p>
+                    </div>
+                </div>
+
+                <!-- Day 4 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d4.jpg" alt="Day 4 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 04</span>
+                        <h3>GIS 专题设计与数据处理</h3>
+                        <p>双线并进：一方面开展 GIS 专题项目的设计与制作，另一方面及时处理采集的数据。</p>
+                    </div>
+                </div>
+
+                <!-- Day 5 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d5.jpeg" alt="Day 5 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 05</span>
+                        <h3>赴上方山周边调研与数据补充采集</h3>
+                        <p>根据小组进度乘车再次前往上方山，针对前期盲区与不足开展实地调研与数据补充采集。</p>
+                    </div>
+                </div>
+
+                <!-- Day 6 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d6.jpg" alt="Day 6 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 06</span>
+                        <h3>专题进展研讨</h3>
+                        <p>召开专题项目进展汇报研讨会，汇总阶段成果并查漏补缺。</p>
+                    </div>
+                </div>
+
+                <!-- Day 7 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d7.jpg" alt="Day 7 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 07</span>
+                        <h3>深化专题项目制作</h3>
+                        <p>全天集中进行专题项目成果的深度制作、空间分析及图件编绘，加速各项核心模块落地。</p>
+                    </div>
+                </div>
+
+                <!-- Day 8 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d8.jpg" alt="Day 8 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 08</span>
+                        <h3>专题成果初步汇报研讨</h3>
+                        <p>组织调研成果的初步汇报与集中研讨，对整体成果查漏补缺，为最终答辩和总结做冲刺准备。</p>
+                    </div>
+                </div>
+
+                <!-- Day 9 -->
+                <div class="timeline-item reveal-on-scroll">
+                    <div class="timeline-node-dot"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-photo-frame">
+                            <img src="photo\d9.jpg" alt="Day 9 实践照片">
+                        </div>
+                        <span class="timeline-day-badge">DAY 09</span>
+                        <h3>圆满结束返程</h3>
+                        <p>收拾行囊与实习设备，全员集合整理，前往中国房山世界地质公园博物馆参观学习。全体同学圆满完成上方山 3S 综合实习任务，顺利返程！</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>© 2026 上方山3S实习第八组 | 上方山山地路径规划决策系统</p>
+        <p>© 联系方式：1004245122@email.cugb.edu.cn</p>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部" title="返回顶部">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5" />
+            <path d="M5 12l7-7 7 7" />
+        </svg>
+    </button>
+
+    <!-- 动态交互与滚动渐显脚本 -->
+<script src="js/main.js" defer></script>
+
+</body>
+</html>

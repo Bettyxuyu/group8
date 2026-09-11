@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认识上方山 | 幽燕奥室·地质与生态景观</title>
+  <meta name="description" content="认识北京上方山国家森林公园，了解其喀斯特地貌、生态资源与历史文化景观。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #2c622c;      /* 墨绿主色 */
+      --primary-dark: #1b3d1b;
+      --primary-light: #eaf1ea;
+      --accent-gold: #c99c47;        /* 人文古迹点缀金色 */
+      --text-main: #1f2421;
+      --text-muted: #5c645e;
+      --bg-light: #f7f9f7;
+      --card-bg: #ffffff;
+      --font-art: "Cinzel", "Noto Serif SC", serif;
+      --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background-color: var(--bg-light);
+      line-height: 1.7;
+    }
+
+    /* Shared navigation styles are maintained in css/style.css. */
+    /* 首屏大 Banner */
+    .shangfang-hero {
+      position: relative;
+      height: 60vh;
+      min-height: 420px;
+      margin-top: 65px;
+      background: url('photo/4.jpg') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+    }
+    .hero-mask {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(16, 28, 16, 0.6) 0%, rgba(16, 28, 16, 0.85) 100%);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 1.5rem;
+    }
+    .hero-content h1 {
+      font-family: var(--font-art);
+      font-size: 2.8rem;
+      letter-spacing: 3px;
+      margin-bottom: 0.8rem;
+    }
+    .hero-content p {
+      font-size: 1.15rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+      opacity: 0.9;
+    }
+
+    /* 容器 */
+    .content-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.8rem;
+    }
+    .section-title::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 45px; height: 3px;
+      background-color: var(--primary-color);
+    }
+
+    /* ================================================= */
+    /* 核心亮点：数读上方山（仿九寨沟数字看板设计）      */
+    /* ================================================= */
+    .stats-section {
+      background: #192719;
+      color: #fff;
+      padding: 2rem 2rem;
+      position: relative;
+    }
+    .stats-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .stats-header h2 {
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+    .stats-header p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.95rem;
+    }
+    .stats-grid-category {
+      margin-bottom: 3rem;
+    }
+    .stats-category-title {
+      font-size: 1.1rem;
+      color: var(--accent-gold);
+      border-left: 3px solid var(--accent-gold);
+      padding-left: 0.8rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1.5rem;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 1.8rem 1.2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .stat-number {
+      font-family: var(--font-art);
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: #8be68b;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-unit {
+      font-size: 1rem;
+      font-weight: normal;
+      color: rgba(255, 255, 255, 0.7);
+      margin-left: 2px;
+    }
+    .stat-label {
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: 0.5px;
+    }
+
+    /* 图文交错混排板块 */
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      margin-bottom: 5rem;
+    }
+    .feature-row.reverse {
+      direction: rtl;
+    }
+    .feature-row.reverse .feature-text {
+      direction: ltr;
+    }
+    .feature-img img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+    .feature-tag {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary-color);
+      margin-bottom: 0.6rem;
+    }
+    .feature-text h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1.2rem;
+      color: var(--text-main);
+    }
+    .feature-text p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 0.98rem;
+    }
+
+    /* 景观分类卡片 (九洞、十二峰、禅院古刹) */
+    .spot-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .spot-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: transform 0.3s;
+    }
+    .spot-card:hover {
+      transform: translateY(-6px);
+    }
+    .spot-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .spot-card-body {
+      padding: 1.8rem;
+    }
+    .spot-card-body h4 {
+      font-size: 1.25rem;
+      margin-bottom: 0.8rem;
+      color: var(--primary-color);
+    }
+    .spot-card-body p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+        /* 外层容器 */
+    .carousel-section-container {
+    position: relative;
+    width: 100%;
+    margin-top: 2rem;
+    }
+
+    .slide-btn:hover {
+    background: var(--primary-color, #2c622c);
+    border-color: var(--primary-color, #2c622c);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(44, 98, 44, 0.25);
+    }
+
+    /* 1. 轮播外层相对定位容器（用于承载左右悬浮按钮） */
+    .carousel-section-container {
+    position: relative;
+    width: 100%;
+    margin-top: 2.5rem;
+    }
+
+    /* 2. 左右两侧悬浮圆形按钮 */
+    .side-arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    color: var(--text-main, #222);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    transition: all 0.25s ease;
+    }
+
+    .prev-arrow { left: -22px; }  /* 左侧凸出悬浮 */
+    .next-arrow { right: -22px; } /* 右侧凸出悬浮 */
+
+    .side-arrow-btn:hover {
+    background: var(--primary-color, #2c622c);
+    color: #ffffff;
+    border-color: var(--primary-color, #2c622c);
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 6px 18px rgba(44, 98, 44, 0.28);
+    }
+
+    /* 3. 卡片横向滑动轨道 */
+    .spot-cards-track {
+    display: flex;
+    gap: 1.8rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding: 0.8rem 0.5rem 1.8rem;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    }
+    .spot-cards-track::-webkit-scrollbar {
+    display: none; /* 隐藏滚动条 */
+    }
+
+    /* 4. 单张卡片外观 */
+    .spot-card {
+    flex: 0 0 calc(33.333% - 1.2rem);
+    min-width: 320px;
+    background: var(--card-bg, #ffffff);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    scroll-snap-align: start;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .spot-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .spot-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    display: block;
+    }
+
+    .spot-card-body {
+    padding: 1.6rem;
+    }
+
+    .spot-card-body h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    color: var(--primary-color, #2c622c);
+    }
+
+    .spot-card-body p {
+    font-size: 0.92rem;
+    color: var(--text-muted, #5c645e);
+    line-height: 1.6;
+    }
+
+    /* 5. 移动端防越界适配 */
+    @media (max-width: 768px) {
+    .prev-arrow { left: 2px; }
+    .next-arrow { right: 2px; }
+    .side-arrow-btn { width: 38px; height: 38px; }
+    .spot-card { flex: 0 0 80%; min-width: 260px; }
+    }
+
+    /* 页脚 */
+    footer {
+      background: #141c14;
+      color: #aeb5ae;
+      padding: 3rem 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+        /* 1. 导航栏主体：添加背景素材图与半透明遮罩 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 4rem;
+      z-index: 1000;
+      
+      background: 
+        url("photo/sc2.png") 55% center/auto 100% no-repeat,
+        linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.92));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(44, 98, 44, 0.12);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+    }
+
+    /* 2. 左上角 Logo 容器 */
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Logo 图片尺寸控制（保证高度与导航栏协调） */
+    .logo-img {
+      height: 50px;         /* 根据你们 Logo 的长宽比微调，通常 38px~46px 最合适 */
+      width: auto;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+    }
+
+    /* Logo 旁边的双行文本排版 */
+    .logo-text-group {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+
+    .logo-title {
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-color, #2c622c);
+      letter-spacing: 0.5px;
+    }
+
+    .logo-subtitle {
+      font-family: var(--font-art);
+      font-size: 0.68rem;
+      color: var(--text-muted, #5c645e);
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* 确保父容器是相对定位，作为绝对定位的参照物 */
+    .relative-box {
+      position: relative;
+      overflow: hidden; /* 防止插图局部超出板块边缘造成横向滚动条 */
+    }
+
+    /* 装饰性 PNG 插图基础样式 */
+    .deco-png {
+      position: absolute;
+      pointer-events: none; /* 核心：穿透鼠标事件，鼠标划过不会阻挡文字选中或点击 */
+      z-index: 0;           /* 置于文字层下方 */
+      opacity: 0.8;        /* 保持半透明暗纹质感，通常 0.1~0.25 最显高级 */
+      transition: opacity 0.4s ease;
+    }
+
+    /* 悬停板块时让暗纹稍微明显一点（可选微交互） */
+    .relative-box:hover .deco-png {
+      opacity: 0.25;
+    }
+
+    /* 位置变体 1：右上角悬浮 */
+    .deco-top-right {
+      top: 8px;
+      right: 0px;
+      width: 200px;
+      height: auto;
+    }
+    .deco-top-left {
+      top: 0px;
+      left: 340px;
+      width: 180px;
+      height: 130px;
+    }
+    .deco-top-right1 {
+      top: 0px;
+      right: 0px;
+      width: 200px;
+      height: 130px;
+    }
+    .deco-bottom-right {
+      bottom: -8px;
+      right: 0px;
+      width: 200px;
+      height: auto;
+    }
+
+    /* 位置变体 2：左下角悬浮 */
+    .deco-bottom-left {
+      bottom: 30px;
+      left: -10px;
+      width: 800px;
+      height: auto;
+    }
+
+    /* 保证前景文字比装饰图层级高 */
+    .content-split, .section-title, .grid-3 {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 手机端隐藏过大的装饰图，保持干净 */
+    @media (max-width: 768px) {
+      .deco-png {
+        display: none;
+      }
+    }
+
+    /* 3. 移动端自适应（防止屏幕过窄时标题和菜单打架） */
+    @media (max-width: 900px) {
+      .navbar {
+        padding: 0.7rem 1.5rem;
+      }
+      .logo-subtitle {
+        display: none;      /* 窄屏下隐藏英文小副标，保持清爽 */
+      }
+      .logo-title {
+        font-size: 0.95rem;
+      }
+      .logo-img {
+        height: 34px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: .9rem 1rem; }
+      .logo { font-size: .95rem; max-width: calc(100% - 3.5rem); }
+      .nav-toggle {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 2.5rem; height: 2.5rem; border: 1px solid rgba(44,98,44,.35);
+        border-radius: 4px; color: var(--primary-color); background: #fff; font-size: 1.25rem;
+      }
+      .nav-links {
+        display: none; position: absolute; top: 100%; left: 0; right: 0;
+        flex-direction: column; align-items: stretch; gap: 0; padding: .5rem 1rem 1rem;
+        background: rgba(255,255,255,.98); border-bottom: 1px solid rgba(0,0,0,.06);
+      }
+      .nav-links.is-open { display: flex; }
+      .nav-links a { padding: .75rem .5rem; }
+      .nav-btn { text-align: center; }
+      .feature-row, .feature-row.reverse { grid-template-columns: 1fr; gap: 2rem; }
+      .feature-img img { height: 260px; }
+      .stat-number { font-size: 2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 顶部菜单栏 -->
+  <nav class="navbar">
+    <!-- 左上角：Logo 图标 + 系统标题 -->
+    <a href="sfs.html" class="logo-container">
+      <!-- 将 logo.png 换成你们实际存放 Logo 的相对路径 -->
+      <img src="photo/logo.png" alt="系统Logo" class="logo-img">
+    </a>
+
+    <!-- 右侧菜单项 -->
+    <div class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="view.html"  class="active">上方山景</a>
+      <a href="research.html">研究流程</a>
+      <a href="team.html">关于我们</a>
+      <a href="http://127.0.0.1:8765" target="_blank" class="nav-btn">道路识别成果</a>
+    </div>
+  </nav>
+
+  <!-- 2. 首屏横幅 -->
+  <header class="shangfang-hero">
+    <div class="hero-mask"></div>
+    <div class="hero-content">
+      <h1>北京上方山国家森林公园</h1>
+      <p>幽燕奥室 · 千年古刹 · 华北典型喀斯特与次生林生态区</p>
+    </div>
+  </header>
+
+  <!-- 3. 图文引言：走进上方山 -->
+  <section class="content-wrap relative-box">
+    <img src="photo/sc7.png" alt="山峦插图" class="deco-png deco-bottom-left">
+    <div class="feature-row">
+      <div class="feature-text">
+        <div class="feature-tag">GEOGRAPHIC PROFILE</div>
+        <h3>燕郊诸山之冠 · 天然生物基因库</h3>
+        <p>
+          上方山国家森林公园地处北京房山，属于太行山脉北段支脉。其自然环境以茂密的华北天然次生林、深邃发育的溶洞天坑以及保存完好的古寺群落著称。
+        </p>
+        <p>
+          群山苍翠环抱，林木遮天蔽日。复杂的微地形高差起伏与林下交织的步道网络，使其不仅是自然风景胜地，也是空间地理信息遥感解译与路网拓扑分析的绝佳天然试验区。
+        </p>
+      </div>
+      <div class="feature-img">
+        <img src="photo/1.jpg" alt="上方山远眺" loading="lazy" decoding="async">
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 4. 核心模块：数读上方山（根据你提供的数据定制的大字号看板） -->
+  <!-- ========================================================= -->
+  <section class="stats-section">
+    <div class="content-wrap" style="padding: 0;">
+      <div class="stats-header">
+        <h2>数读上方山</h2>
+        <p>STATISTICAL OVERVIEW OF NATURAL & CULTURAL HERITAGE</p>
+      </div>
+
+      <!-- 分组 1：植被与植物资源 -->
+      <div class="stats-grid-category">
+        <div class="stats-category-title">植被与植物生态</div>
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-number">110<span class="stat-unit">科</span></div>
+            <div class="stat-label">316属 · 652种野生植物</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">10<span class="stat-unit">种</span></div>
+            <div class="stat-label">国家重点保护植物</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">21<span class="stat-unit">种</span></div>
+            <div class="stat-label">北京市重点保护植物</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">23<span class="stat-unit">种</span></div>
+            <div class="stat-label">独有特有植物</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">10000+<span class="stat-unit">株</span></div>
+            <div class="stat-label">古树名木（共18种）</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分组 2：野生动物资源 -->
+      <div class="stats-grid-category">
+        <div class="stats-category-title">野生动物生态</div>
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-number">149<span class="stat-unit">种</span></div>
+            <div class="stat-label">陆生野生动物</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">18<span class="stat-unit">种</span></div>
+            <div class="stat-label">国家级重点保护动物</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">80<span class="stat-unit">种</span></div>
+            <div class="stat-label">北京市级重点保护动物</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分组 3：历史文物与古建筑古迹 -->
+      <div class="stats-grid-category">
+        <div class="stats-category-title">千年禅院与历史文化遗存</div>
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-number">26<span class="stat-unit">处</span></div>
+            <div class="stat-label">完好寺庵</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">18<span class="stat-unit">处</span></div>
+            <div class="stat-label">寺庵遗址</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">57<span class="stat-unit">座</span></div>
+            <div class="stat-label">历代古塔遗存</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">53<span class="stat-unit">通</span></div>
+            <div class="stat-label">汉白玉石经幢</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">42<span class="stat-unit">项</span></div>
+            <div class="stat-label">壁画22幅 · 石碑石刻20处</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">17<span class="stat-unit">处</span></div>
+            <div class="stat-label">古井11眼 · 古桥5座 · 云梯1座</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. 特色地貌景观深入介绍 -->
+  <section class="content-wrap">
+    <h2 class="section-title">九洞十二峰 · 胜景掠影</h2>
+
+    <!-- 九洞之首云水洞 -->
+    <div class="feature-row">
+      <div class="feature-text">
+        <div class="feature-tag">Karst Cavern</div>
+        <h3>云水深处 · 华北岩溶奇观</h3>
+        <p>
+          上方山古洞众多，天然形成九洞。九洞之首为<strong>云水洞</strong>，是我国北方最早开放的溶洞之一，素有“幽燕奥室”之誉。洞深630米，洞厅高大宏伟。
+        </p>
+        <p>
+          第二大厅中高耸达 <strong>38米</strong> 的石笋“擎天玉柱”，为中国第一大石笋，举世罕见。洞内钟乳石一经敲击，可发出铜钟般的声响，石幔亦能成乐，尽显大自然百万年水文沉淀的造物神奇。洞口有赵朴初先生亲笔题写的“云水洞”三字，百余年前便已有法国地质学家来此测绘。
+        </p>
+      </div>
+      <div class="feature-img">
+        <img src="photo/13.jpg" alt="云水洞溶洞景观" loading="lazy" decoding="async">
+      </div>
+    </div>
+
+    <!-- 罕见高山天坑 -->
+    <div class="feature-row reverse relative-box">
+      <img src="photo/m2.png" alt="山峦插图" class="deco-png deco-top-right">
+      <div class="feature-text">
+        <div class="feature-tag">Geological Sinkhole</div>
+        <h3>北方罕见 · 山地倒置天坑</h3>
+        <p>
+          继南方喀斯特天坑之后，上方山天坑是<strong>我国北方地区首次发现的岩溶天坑地质构造</strong>。不同于一般的沟谷天坑，上方山天坑坐落在山脊之上。
+        </p>
+        <p>
+          天坑口小底大，形似倒置喇叭，口径约30米，底部深达70余米。坑底形成了相对封闭湿润的小气候环境，孕育着独特的天然植被与化石标本，具有极高的地质研究价值。
+        </p>
+      </div>
+      <div class="feature-img">
+        <img src="photo/31.jpg" alt="天坑与林木" loading="lazy" decoding="async">
+      </div>
+    </div>
+
+    <!-- 古云梯 -->
+    <div class="feature-row relative-box">
+      <img src="photo/m4.png" alt="山峦插图" class="deco-png deco-top-left">
+      <div class="feature-text">
+        <div class="feature-tag">Ancient Cloud Ladder</div>
+        <h3>登云绝壁 · 明代古云梯</h3>
+        <p>
+          古云梯凿于绝壁之上，为<strong>明代</strong>所建的上山要道，凡欲探访上方山诸景，必先登此险梯。二百六十二级石阶沿山势蜿蜒而上，两旁置以铁索护持，人行其上如悬半空，险峻之势堪称“上方山第一关”。石壁之上镌刻“幽燕奥室”四字，为登临之旅平添几分神秘意蕴。
+        </p>
+        <p>
+          上世纪六十年代，电影《智取威虎山》曾在此取景，使古云梯更添传奇色彩。山下的圣水峪为登梯起点，沿奇峰峡谷北上，穿过林木掩映的石径，眼前豁然开朗——绝壁千仞间，石阶如练垂挂，既是攀登之路，亦是朝圣之途。
+        </p>
+      </div>
+      <div class="feature-img">
+        <img src="photo/27.jpg" alt="明代古云梯" loading="lazy" decoding="async">
+      </div>
+    </div>
+
+    <!-- 千年古刹 -->
+    <div class="feature-row reverse relative-box">
+      <img src="photo/m3.png" alt="山峦插图" class="deco-png deco-top-right1">
+      <div class="feature-text">
+        <div class="feature-tag">Tusita Temple</div>
+        <h3>古崖梵音 · 千年兜率寺</h3>
+        <p>
+          兜率寺坐落于上方山西华峰与莲花峰之间，是七十二寺庵的总方丈所在地。开山建寺可追溯至<strong>东汉或隋唐</strong>，明代万历初年由司礼监掌印太监冯保主持重建，并亲笔手书《佛说四十二章经》镌刻于正殿后檐墙，四百余年保存至今。
+        </p>
+        <p>
+          寺内存金代经幢两座、明代铸铁香炉，舍利殿壁画为明晚期至清中期精品。寺院下方分布着辽金至明清历代住持墓塔<strong>54</strong>座，规模居北京第二。寺周古树参天，树龄逾千年的柏树、松树见证岁月沧桑。登临古寺，须经二百六十二级明代云梯方可抵达，更显其超然尘外之姿。
+        </p>
+      </div>
+      <div class="feature-img">
+        <img src="photo/17.jpg" alt="兜率寺景观" loading="lazy" decoding="async">
+      </div>
+    </div>
+
+    <!-- 景观分类横向滑动卡片（左右悬浮箭头版） -->
+    <div class="carousel-section-container">
+    
+        <!-- 左侧悬浮翻页按钮 -->
+        <button class="side-arrow-btn prev-arrow" type="button" data-scroll-direction="left" aria-label="向左滑动">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+
+        <!-- 右侧悬浮翻页按钮 -->
+        <button class="side-arrow-btn next-arrow" type="button" data-scroll-direction="right" aria-label="向右滑动">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <!-- 可滑动的卡片轨道 -->
+        <div class="spot-cards-track" id="spotTrack">
+            
+            <div class="spot-card">
+            <img src="photo/8.jpg" alt="天柱峰" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>天柱峰</h4>
+                <p>天柱峰为上方山十二峰之首，是罕见的岩溶石柱奇观，海拔864米，又名摘星坨。登临峰顶可望涿州塔影，云海翻涌，如入天际。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/14.jpg" alt="上方山古代造像" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>上方山古代造像</h4>
+                <p>上方山佛教造像分布诸寺庵与洞窟，云水洞内辽代摩崖佛像尤为珍贵，线条朴拙传神。山中佛像历经千年，眉目间依然透着慈悲与安详。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/15.jpg" alt="观音殿" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>观音殿</h4>
+                <p>观音殿位于普陀崖，为山中供奉观音之要殿。清代显亲王曾赐“福”字匾额，老懿亲王亦题赐之，足见其地位殊胜。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/16.jpg" alt="山路古塔" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>山路古塔</h4>
+                <p>沿山道而行，偶见石塔孤立，多为历代高僧灵塔，散落山林间，与苍松翠柏为伴。每一座塔都是一段修行，静立路旁，注视着往来行人。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/19.jpg" alt="刻经石板壁" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>刻经石板壁</h4>
+                <p>兜率寺后檐墙镶嵌明万历年间司礼监掌印太监冯保手书《佛说四十二章经》刻石，十五方青石板，两千余字保存完好，四百余年字迹清晰如初。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/20.jpg" alt="青龙泉" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>青龙泉</h4>
+                <p>青龙泉水自山岩渗出，汇聚成潭，水质纯净，清凉沁骨。相传为华严祖师驱龙开山时所留，与一斗泉同为上方山名泉，掬之入口，暑气顿消。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/25.jpg" alt="砖塔与塔林" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>砖塔与塔林</h4>
+                <p>兜率寺下方塔林，存辽金至明清墓塔五十四座，规模北京第二，形制各异。砖塔、石塔参差林立，松涛声中静默说法，见证千年香火传承。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/26.jpg" alt="瓣香庵" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>瓣香庵</h4>
+                <p>瓣香庵为七十二庵之一，庵名取“一瓣心香”之意。2025年北京市文物局批复其修缮方案，以最小干预原则延续古庵历史风貌。</p>
+            </div>
+            </div>
+
+            <div class="spot-card">
+            <img src="photo/28.jpg" alt="悬崖石瀑" loading="lazy" decoding="async">
+            <div class="spot-card-body">
+                <h4>悬崖石瀑</h4>
+                <p>雨雪丰沛之时，山水自斗泉岩、云梯岩凌空叠落，飞瀑悬垂如白练。明人谓之“悬崖飞瀑”，水雾中偶现彩虹，为上方山一大奇观。</p>
+            </div>
+            </div>
+
+        </div>
+    </div>
+  </section>
+
+  <!-- 6. 页脚 -->
+  <footer>
+    <p>© 2026 上方山3S实习第八组 | 上方山山地路径规划决策系统</p>
+    <p>© 联系方式：1004245122@email.cugb.edu.cn</p>
+  </footer>
+
+<script src="js/main.js" defer></script>
+
+</body>
+</html>

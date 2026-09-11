@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>上方山山地路径规划决策系统</title>
+    <meta name="description" content="上方山山地路径规划决策系统的研究背景、技术路线、路径验证与成果展示。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+    <style>
+        /* ============================================================
+           ROOT 变量
+           ============================================================ */
+        :root {
+            --primary-color: #1b4332;
+            --primary-light: #2d6a4f;
+            --accent-color: #40916c;
+            --text-main: #1b2622;
+            --text-muted: #52796f;
+            --bg-light: #f4f7f5;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(45, 106, 79, 0.12);
+            --font-art: "Playfair Display", "Noto Serif SC", serif;
+            --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+            --shadow-sm: 0 4px 16px rgba(27, 67, 50, 0.05);
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ============================================================
+           全局重置 & 背景
+           ============================================================ */
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.7;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232d6a4f' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* ============================================================
+           自定义滚动条
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e9efe9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 10px;
+            border: 2px solid #e9efe9;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* ============================================================
+           滚动进度条
+           ============================================================ */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), #74c69d);
+            z-index: 9999;
+            transition: width 0.1s ease-out;
+            box-shadow: 0 2px 12px rgba(27, 67, 50, 0.35);
+        }
+
+        /* ============================================================
+           滚动渐显动画
+           ============================================================ */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+    /* Shared navigation styles are maintained in css/style.css. */
+        /* ============================================================
+           侧边栏
+           ============================================================ */
+        .sidebar {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            width: 220px;
+            height: calc(100vh - 72px);
+            z-index: 999;
+            background: rgba(248, 250, 252, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-right: 1px solid rgba(45, 106, 79, 0.06);
+            padding: 32px 20px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+        .sidebar-title {
+            font-family: var(--font-art);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 28px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(45, 106, 79, 0.08);
+            letter-spacing: 0.5px;
+        }
+        .sidebar a {
+            display: block;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 10px 14px;
+            margin: 4px 0;
+            border-radius: 10px;
+            transition: var(--transition);
+            cursor: pointer;
+            letter-spacing: 0.3px;
+        }
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--primary-light);
+            border-radius: 4px;
+            transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .sidebar a:hover,
+        .sidebar a:focus {
+            background: rgba(45, 106, 79, 0.05);
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+        .sidebar a:hover::before {
+            height: 20px;
+        }
+
+        /* ============================================================
+           主内容区
+           ============================================================ */
+        .container {
+            max-width: 1100px;
+            margin-left: 220px;
+            padding: 0 40px 40px 40px;
+        }
+
+        /* ============================================================
+           内容块
+           ============================================================ */
+        .content-block {
+            padding: 20px 0 24px 0;
+            border-bottom: 1px solid rgba(45, 106, 79, 0.06);
+        }
+        .content-block:last-of-type {
+            border-bottom: none;
+        }
+
+        /* ============================================================
+           ★ 标题区域 — 使用本地图片作为背景
+           ============================================================ */
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            padding: 70px 60px 50px 60px;
+            margin: 85px 0 16px 0;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--primary-color);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            /* 使用本地图片路径，请根据实际位置修改 */
+            background-image: url('photo/34.jpg');
+            background-size: cover;
+            background-position: center 35%;
+            background-repeat: no-repeat;
+            z-index: 1;
+            transition: transform 0.6s ease;
+        }
+        .hero-banner:hover::before {
+            transform: scale(1.02);
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg,
+                    rgba(20, 40, 30, 0.78) 0%,
+                    rgba(15, 30, 22, 0.65) 50%,
+                    rgba(10, 25, 18, 0.72) 100%);
+            z-index: 2;
+        }
+        .hero-banner>* {
+            position: relative;
+            z-index: 3;
+        }
+        .hero-banner h1 {
+            font-family: var(--font-art);
+            font-size: 2.8rem;
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            line-height: 1.15;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
+            max-width: 780px;
+        }
+        .hero-banner .subtitle {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 6px;
+            font-style: italic;
+            font-weight: 400;
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+            letter-spacing: 0.3px;
+        }
+        .hero-banner .tag-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .hero-banner .tag {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 4px 18px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .hero-banner .tag:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           ★ 标题体系 — 更加突出醒目
+           ============================================================ */
+
+        /* ----- h2：章节主标题（带装饰条 + 微背景） ----- */
+        h2 {
+            font-family: var(--font-art);
+            font-size: 2.0rem;
+            color: var(--primary-color);
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            margin: 1.8rem 0 0.8rem 0;
+            padding: 0.6rem 1.2rem 0.6rem 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid rgba(45, 106, 79, 0.10);
+        }
+        /* 左侧粗装饰条 */
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 38px;
+            margin-right: 16px;
+            border-radius: 4px;
+            background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(45, 106, 79, 0.25);
+        }
+        /* 右侧微光晕 */
+        h2::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-color));
+            opacity: 0.4;
+        }
+
+        /* ----- h3：次级标题（左侧色块 + 字重增强） ----- */
+        h3 {
+            font-family: var(--font-art);
+            font-size: 1.4rem;
+            color: var(--primary-light);
+            margin: 1.6rem 0 0.5rem 0;
+            padding-left: 16px;
+            font-weight: 700;
+            position: relative;
+            letter-spacing: 0.5px;
+        }
+        h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 4px;
+            height: calc(100% - 16px);
+            background: var(--primary-light);
+            border-radius: 3px;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        h3:hover::before {
+            opacity: 1;
+        }
+
+        /* ----- h4：小标题（圆点装饰 + 颜色加深） ----- */
+        h4 {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 0.9rem;
+            font-size: 1.05rem;
+            padding-left: 22px;
+            position: relative;
+            letter-spacing: 0.3px;
+        }
+        h4::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            opacity: 0.55;
+            transition: all 0.3s ease;
+        }
+        h4:hover::before {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.25);
+            box-shadow: 0 0 12px rgba(64, 145, 108, 0.35);
+        }
+
+        /* ============================================================
+           正文排版
+           ============================================================ */
+        p, li {
+            color: var(--text-main);
+            line-height: 1.7;
+            font-weight: 400;
+        }
+        ul, ol {
+            padding-left: 22px;
+            margin: 8px 0 12px 0;
+        }
+        li {
+            margin: 4px 0;
+        }
+        .quote {
+            background: rgba(45, 106, 79, 0.03);
+            border-left: 3px solid var(--primary-light);
+            border-radius: 6px;
+            padding: 14px 20px;
+            margin: 16px 0;
+        }
+        .quote p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* ============================================================
+           HUD 数据卡片
+           ============================================================ */
+        .hud-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 18px 0;
+        }
+        .data-card {
+            flex: 1;
+            min-width: 140px;
+            padding: 16px 20px;
+            background: #ffffff;
+            border: 1px solid rgba(45, 106, 79, 0.06);
+            border-radius: 14px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .data-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(27, 67, 50, 0.08);
+            border-color: rgba(45, 106, 79, 0.15);
+        }
+        .data-card span {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .data-card strong {
+            display: block;
+            margin-top: 6px;
+            font-size: 1.8rem;
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           图片
+           ============================================================ */
+        img {
+            max-width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(45, 106, 79, 0.06);
+            box-shadow: 0 4px 16px rgba(27, 67, 50, 0.04);
+            transition: var(--transition);
+        }
+        img:hover {
+            transform: scale(1.005);
+            box-shadow: 0 8px 28px rgba(27, 67, 50, 0.08);
+        }
+        .img-wrap-center {
+            text-align: center;
+            margin: 16px 0;
+        }
+          /* Logo 图片尺寸控制（保证高度与导航栏协调） */
+        .logo-img {
+            height: 50px;         /* 根据你们 Logo 的长宽比微调，通常 38px~46px 最合适 */
+            width: auto;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+
+            /* 覆盖全局 img 的边框/阴影/圆角，让 Logo 干净 */
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* 覆盖全局 img:hover 的放大和阴影 */
+        .logo-img:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ============================================================
+           弹性布局
+           ============================================================ */
+        .flex-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+        .flex-col {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        /* ============================================================
+           表格
+           ============================================================ */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(45, 106, 79, 0.06);
+            margin: 10px 0;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid rgba(45, 106, 79, 0.06);
+            text-align: left;
+        }
+        th {
+            background: rgba(45, 106, 79, 0.03);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* ============================================================
+           ★ 页脚 — 亮白色，适配侧边栏
+           ============================================================ */
+        footer {
+            background: #111a14;
+            color: #f0f7f2;          /* 亮白青，极高对比度 */
+            padding: 4rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            margin-left: 220px;        /* 与侧边栏对齐 */
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* 增强可读性 */
+        }
+        footer p {
+            letter-spacing: 1px;
+            margin: 0.3rem 0;
+            opacity: 1;
+            color: #f0f7f2;   /* 显式覆盖全局 p 规则，保证亮白色 */
+        }
+        footer a {
+            color: #b5d6c4;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: #ffffff;
+        }
+
+        /* ============================================================
+           返回顶部按钮
+           ============================================================ */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 6px 28px rgba(27, 67, 50, 0.35);
+            z-index: 999;
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+        .back-to-top::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: rgba(45, 106, 79, 0.25);
+            z-index: -1;
+            animation: pulse-ring 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .back-to-top:hover {
+            transform: translateY(-3px) scale(1.06);
+            box-shadow: 0 12px 40px rgba(27, 67, 50, 0.5);
+        }
+        .back-to-top svg {
+            display: block;
+            width: 24px;
+            height: 24px;
+            stroke: #fff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+        .back-to-top.hidden {
+            opacity: 0 !important;
+            transform: scale(0.8) translateY(10px) !important;
+            pointer-events: none !important;
+        }
+            /* 1. 导航栏主体：添加背景素材图与半透明遮罩 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 4rem;
+            z-index: 1000;
+            
+            /* 核心：放置素材背景图，并叠加一层半透明白色磨砂，避免背景图过杂干扰文字阅读 */
+            /* 将 photo/nav-bg.jpg 换成你的素材图路径 */
+            background: 
+                url("photo/sc2.png") 55% center/auto 100% no-repeat,
+                linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.92));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(44, 98, 44, 0.12);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        /* 2. 左上角 Logo 容器 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Logo 图片尺寸控制（保证高度与导航栏协调） */
+        .logo-img {
+            height: 50px;         /* 根据你们 Logo 的长宽比微调，通常 38px~46px 最合适 */
+            width: auto;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+        }
+
+        /* Logo 旁边的双行文本排版 */
+        .logo-text-group {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+        }
+
+        .logo-title {
+            font-family: var(--font-sans);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary-color, #2c622c);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-subtitle {
+            font-family: var(--font-art);
+            font-size: 0.68rem;
+            color: var(--text-muted, #5c645e);
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* 3. 移动端自适应（防止屏幕过窄时标题和菜单打架） */
+        @media (max-width: 900px) {
+            .navbar {
+            padding: 0.7rem 1.5rem;
+            }
+            .logo-subtitle {
+            display: none;      /* 窄屏下隐藏英文小副标，保持清爽 */
+            }
+            .logo-title {
+            font-size: 0.95rem;
+            }
+            .logo-img {
+            height: 34px;
+            }
+        }
+
+        /* ============================================================
+           响应式
+           ============================================================ */
+        @media (max-width: 992px) {
+            .sidebar { display: none; }
+            .container { margin-left: 0; padding: 0 24px 40px; }
+            footer { margin-left: 0; padding: 3rem 1.5rem; }
+            .hero-banner { margin-top: 75px; padding: 50px 30px 40px 30px; min-height: 240px; border-radius: 16px; }
+            .hero-banner h1 { font-size: 2rem; }
+            h2 { font-size: 1.7rem; }
+            .navbar { padding: 0.8rem 1.5rem; }
+            .nav-links { gap: 1.2rem; }
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: .8rem 1rem; }
+            .flex-row { flex-direction: column; }
+            .navbar .logo { font-size: 0.95rem; }
+            .nav-links a { font-size: 0.8rem; }
+            .nav-btn { padding: 0.35rem 0.8rem; font-size: 0.75rem; }
+            .container { padding: 0 16px 30px; }
+            .hero-banner { margin-top: 65px; padding: 30px 20px 25px 20px; min-height: 180px; border-radius: 12px; margin-bottom: 10px; }
+            .hero-banner h1 { font-size: 1.5rem; }
+            .hero-banner .subtitle { font-size: 0.9rem; }
+            .back-to-top { bottom: 16px; right: 16px; width: 48px; height: 48px; }
+            .back-to-top svg { width: 20px; height: 20px; }
+            .data-card { min-width: 100px; padding: 14px; }
+            .data-card strong { font-size: 1.4rem; }
+            .hero-banner .tag { font-size: 0.7rem; padding: 3px 12px; }
+            footer { padding: 2rem 1rem; font-size: 0.8rem; }
+            .nav-toggle {
+                display: inline-flex; align-items: center; justify-content: center;
+                width: 2.5rem; height: 2.5rem; border: 1px solid rgba(45,106,79,.35);
+                border-radius: 4px; background: #fff; color: var(--primary-color); font-size: 1.25rem;
+            }
+            .nav-links {
+                display: none; position: absolute; top: 100%; left: 0; right: 0; padding: .5rem 1rem 1rem;
+                flex-direction: column; align-items: stretch; gap: 0; background: rgba(255,255,255,.98);
+                border-bottom: 1px solid rgba(0,0,0,.06);
+            }
+            .nav-links.is-open { display: flex; }
+            .nav-links a { padding: .75rem .5rem; }
+            .nav-btn { text-align: center; }
+        }
+        @media (max-width: 768px) {
+            .hero-banner::before { background-position: center 30%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 滚动进度条 -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- 1. 顶部菜单栏 -->
+    <nav class="navbar">
+        <!-- 左上角：Logo 图标 + 系统标题 -->
+        <a href="sfs.html" class="logo-container">
+        <!-- 将 logo.png 换成你们实际存放 Logo 的相对路径 -->
+        <img src="photo/logo.png" alt="系统Logo" class="logo-img">
+        </a>
+
+        <!-- 右侧菜单项 -->
+        <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="view.html">上方山景</a>
+        <a href="research.html" class="active">研究流程</a>
+        <a href="team.html">关于我们</a>
+        <a href="http://127.0.0.1:8765" target="_blank" class="nav-btn">道路识别成果</a>
+        </div>
+    </nav>
+
+    <!-- ========== 左侧侧边栏 ========== -->
+    <div class="sidebar">
+        <div class="sidebar-title">章节导航</div>
+        <a href="#sec1">01 项目背景</a>
+        <a href="#sec2">02 技术路线</a>
+        <a href="#sec3">03 路径验证</a>
+        <a href="#sec4">04 项目成果</a>
+    </div>
+
+    <!-- ========== 主内容 ========== -->
+    <div class="container">
+
+        <!-- ====== 标题区 ====== -->
+        <section id="sec0" class="hero-banner reveal-on-scroll">
+            <h1>上方山山地路径规划决策系统</h1>
+            <p class="subtitle"> Shangfang Mountain Terrain Path Planning Decision-Making System</p>
+            <div class="tag-group">
+                <span class="tag">#微地形分析</span>
+                <span class="tag">#LCP路径规划</span>
+                <span class="tag">#HPI通行性指数</span>
+            </div>
+        </section>
+
+        <!-- ====== 01 项目背景 ====== -->
+        <section id="sec1" class="content-block reveal-on-scroll">
+            <h2>01 项目背景</h2>
+            <div>
+                <h3>山地通行痛点</h3>
+                <ul>
+                    <li><b>现状矛盾：</b>传统山地研究多聚焦于“把路画出来”，但应急通行需要判断“这条路能不能安全走”。经验导航难以应对突发疏散与伤员转运。</li>
+                    <li><b>影像的局限：</b>高分影像易受树冠、阴影、冲沟干扰，常将兽径或冲沟误判为道路。</li>
+                </ul>
+                <div class="img-wrap-center">
+                    <img src="photo/demo1.png" alt="高分影像道路提取示例" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+                <div class="quote">
+                    <p><b>核心转向：</b>激光雷达（LiDAR）可获取0.3 m级高精度DEM，精细刻画微地形，为通行分析提供可靠数据基础。</p>
+                </div>
+            </div>
+            <div>
+                <h3>三大应用场景</h3>
+                <p>构建基于微地形分析的应急通行决策体系。</p>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <h4>① 应急通行</h4>
+                        <p>主干道受阻时，依据坡度与粗糙度优化路线，规避高风险地形，平衡效率与体能消耗。</p>
+                    </div>
+                    <div class="flex-col">
+                        <h4>② 紧急撤离</h4>
+                        <p>雨雾或伤情下，动态加权LCP算法屏蔽冲沟、陡坡，输出“最安全”撤离通道。</p>
+                    </div>
+                    <div class="flex-col">
+                        <h4>③ 救援支撑</h4>
+                        <p>担架转运时，评估路宽、横坡与转弯半径，筛选平缓稳固的可通行廊道。</p>
+                    </div>
+                </div>
+                <div class="img-wrap-center">
+                    <img src="photo/demo2.png" alt="不同装备坡度阈值分析图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+            </div>
+            <div>
+                <h3>技术突破口</h3>
+                <ul>
+                    <li>高分辨率DEM可构建精细通行性地图，但现有研究多面向车辆，缺少面向人与担架的模型。</li>
+                    <li>高分影像提取道路需二次核验。</li>
+                </ul>
+                <h4 style="margin-top:12px;">本项目创新点</h4>
+                <ul>
+                    <li>引入0.3 m DEM，构建地形粗糙度、横坡微地形模型；</li>
+                    <li>影像初筛 + DEM滤波双重核验，剔除伪路径；</li>
+                    <li>构建面向人的HPI通行性指数，多情景动态权重输出路线包。</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ====== 02 技术路线与模型构建 ====== -->
+        <section id="sec2" class="content-block reveal-on-scroll">
+            <h2>02 技术路线与模型构建</h2>
+            <div>
+                <h3>总体技术路线</h3>
+                <p>理念：<b>影像提供“线”线索，DEM提供“面”约束，多源融合。</b></p>
+                <div class="img-wrap-center">
+                    <img src="photo/flowchart.png" alt="山地通行性分析实施流程图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+                <ol>
+                    <li>预处理：0.3 m DEM衍生坡度、粗糙度、汇流等因子。</li>
+                    <li>识别：影像初筛候选路径，DEM滤波剔除伪路径。</li>
+                    <li>建模：构建HPI通行性指数成本面。</li>
+                    <li>决策：LCP算法生成多情景路线包。</li>
+                </ol>
+                <p><b>算法依据：</b>ArcGIS Pro / QGIS Cost‑Distance &amp; LCP，将研究区视为连续阻力场，栅格单元赋予HPI成本，Dijkstra/A*求解最小累计成本路径。</p>
+            </div>
+            <div>
+                <h3>道路识别模块：双层处理</h3>
+                <ul>
+                    <li><b>第一层（影像宽松初筛）</b>：边缘检测+形态学，提取候选小路，不漏羊肠小道。</li>
+                    <li><b>第二层（DEM严格核验）</b>：汇流累积量识别冲沟，曲率识别凹陷，横坡识别险段，剔除虚警。</li>
+                </ul>
+                <div class="img-wrap-center">
+                    <img src="photo/demo4.png" alt="影像提取虚警示意图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+                <p style="color:var(--text-muted); font-size:0.9rem;">图注：蓝色为遗漏小道，红色为虚警（不存在道路）。</p>
+            </div>
+            <div>
+                <h3>HPI人类通行性指数</h3>
+                <div class="img-wrap-center">
+                    <img src="photo/hpi.png" alt="HPI因子示意图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+                <p>HPI将野外“好不好走，危不危险”转化为栅格成本。</p>
+                <ul>
+                    <li><b>坡度</b>：基础阻力，>30°视为步行极限。</li>
+                    <li><b>横坡</b>：安全惩罚，过大易滑倒或担架侧倾。</li>
+                    <li><b>粗糙度</b>：碎石树根影响稳定性。</li>
+                    <li><b>汇流累积量</b>：雨后冲沟风险，超阈值禁止通行。</li>
+                    <li><b>曲率</b>：凸脊凹沟风险惩罚。</li>
+                </ul>
+            </div>
+            <div>
+                <h3>多情景路径模拟</h3>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <h4>日常模式（效率优先）</h4>
+                        <p>最小化距离成本，兼顾微地形阻力，晴好轻装。</p>
+                    </div>
+                    <div class="flex-col">
+                        <h4>应急模式（安全优先）</h4>
+                        <p>坡度横坡高权重，规避滑坠，伤员撤离。</p>
+                    </div>
+                    <div class="flex-col">
+                        <h4>极端天气（风险规避）</h4>
+                        <p>水文约束，汇流超阈值栅格设为屏障，阻断冲沟。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== 03 路径计算与野外验证 ====== -->
+        <section id="sec3" class="content-block reveal-on-scroll">
+            <h2>03 路径计算与野外验证</h2>
+            <div>
+                <h3>LCP最小成本路径算法</h3>
+                <ul>
+                    <li>输入：起止点、DEM综合成本栅格。</li>
+                    <li>输出：最优路径矢量、成本参数。</li>
+                    <li>价值：从“凭经验”升级为“数据算路”，为野外验证提供理论依据。</li>
+                </ul>
+            </div>
+            <div>
+                <h3>上方山实地验证</h3>
+                <h4>考察样表</h4>
+                <table>
+                    <thead>
+                        <tr><th>序号</th><th>点位ID</th><th>经纬度</th><th>路面类型</th><th>风险等级</th><th>概况</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>P‑001</td><td>115°E/39°N</td><td>水泥硬化</td><td>1级</td><td>平整开阔，通行极佳</td></tr>
+                        <tr><td>02</td><td>P‑002</td><td>115°E/39°N</td><td>山间碎石</td><td>3级</td><td>崎岖较陡，需谨慎</td></tr>
+                        <tr><td>03</td><td>P‑003</td><td>115°E/39°N</td><td>悬崖边缘</td><td>5级</td><td>临崖无护栏，禁止通行</td></tr>
+                    </tbody>
+                </table>
+                <p>路面分类：硬化路、砂石路、自然野径（草甸、荆棘、涉水）。</p>
+                <ul>
+                    <li>1‑2级：极低风险，可快速通行。</li>
+                    <li>3‑4级：中等风险，谨慎通行。</li>
+                    <li>5级：极高风险，严禁进入。</li>
+                </ul>
+            </div>
+            <div>
+                <h3>模型校正逻辑</h3>
+                <div class="img-wrap-center">
+                    <img src="photo/correct.png" alt="路径偏差校正示意图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+                <ol>
+                    <li><b>差异定位</b>：算法路径与GNSS轨迹叠加，定位误判位置。</li>
+                    <li><b>动态权重迭代</b>：根据野外反馈，对频繁避让地形上调阻力权重。</li>
+                    <li><b>消除模型幻觉</b>：确保“模型可行”即“现实可达”。</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ====== 04 分工、计划与成果 ====== -->
+        <section id="sec4" class="content-block reveal-on-scroll">
+            <h2>04 项目成果</h2>
+            <div>
+                <h3>山地路径规划决策系统</h3>
+                <ul>
+                    <li><b>山门序章 · 沉浸叙事导览</b>进入系统即见视差画卷，以“山门序章”为叙事入口铺展上方山喀斯特峰丛与文化底色；平滑下滚即可无缝转场至规划核心区，实现从自然认知到路径决策的自然过渡。</li>
+                </ul>
+            <div>
+         
+                <div class="img-wrap-center">
+                    <img src="photo/start.png" alt="系统界面截图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+            </div>
+            <div>
+                <ul>
+                    <li><b>二维工作台 · 多情景规划对照</b>以高分遥感影像为底图，支持在地图上灵活交互点选起止端点；右下角叠置微地形坡度识别图层与成本热力面，实现影像表象与地貌阻力的直观互映。系统后台即刻并行计算并输出最短、稳妥、低扰动、综合四组候选路线，结果面板同步联动展示高程-坡度纵剖面与阻力构成，险段陡坡一览无余。</li>
+                </ul>
+            <div>
+         
+                <div class="img-wrap-center">
+                    <img src="photo/2d.png" alt="系统界面截图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+            </div>
+            <div>
+                <ul>
+                    <li><b>三维场景 · 实景透视与虚拟领航</b>无缝承接二维所选路线并实现真三维贴地渲染；路径沿线采用冷暖分段色彩直观反映坡度陡缓，并由“导航小人”在三维山体间贴地导引领航；侧栏即时呈现高程极值、最大纵坡等关键参数。系统深度集成 16 块无人机倾斜摄影实景航模与 5 m AW3D DEM，支持高清 / 均衡 / 流畅三档 LOD 画质流畅切换，兼顾沉浸感与多终端运行效率。</li>
+                </ul>
+            <div>
+         
+                <div class="img-wrap-center">
+                    <img src="photo/3d.png" alt="系统界面截图" style="width:50%;height:auto;" loading="lazy" decoding="async" />
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ========== 页脚 — 亮白字体，清晰可见 ========== -->
+    <footer>
+        <p>© 2026 上方山3S实习第八组 | 上方山山地路径规划决策系统</p>
+        <p>© 联系方式：1004245122@email.cugb.edu.cn</p>
+    </footer>
+
+    <!-- ========== 返回顶部按钮 ========== -->
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部" title="返回顶部">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5" />
+            <path d="M5 12l7-7 7 7" />
+        </svg>
+    </button>
+
+<script src="js/main.js" defer></script>
+
+</body>
+</html>
